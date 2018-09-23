@@ -1,7 +1,6 @@
 package com.wswright.clicker;
 
 import com.wswright.clicker.keyboard.*;
-import com.wswright.clicker.loop.StartStopLoop;
 import com.wswright.clicker.mouse.MouseGetter;
 import com.wswright.clicker.mouse.MouseMover;
 import org.jnativehook.GlobalScreen;
@@ -17,7 +16,6 @@ public class Main {
     private static MouseGetter mouseGetter = new MouseGetter();
 
     public static void main(String[] args) {
-        StartStopLoop loop = new StartStopLoop();
         System.out.print("Registering Native Hook...");
         try {
             GlobalScreen.registerNativeHook();
@@ -27,7 +25,6 @@ public class Main {
         }
         System.out.print(" Complete! Adding Native Key Listener...");
         GlobalKeyListener listener = new GlobalKeyListener();
-        listener.setLoop(loop);
 
         //Create Hooks
         BoxBuilderKeyHook boxHook = new BoxBuilderKeyHook();
@@ -42,7 +39,7 @@ public class Main {
         GlobalScreen.addNativeKeyListener(listener);
         System.out.println(" Complete! Listening...");
 
-        setLogger();
+        setGlobalScreenLoggerLevel(Level.WARNING);
         boolean running = true;
         while(running) {
             boolean mouseMoved = false;
@@ -75,13 +72,12 @@ public class Main {
         return String.format("[%d, %d]", p.x, p.y);
     }
 
-    private static String fmtPointerInfo(PointerInfo p) {
-        return String.format("[%d, %d]-[]", p.getLocation().x, p.getLocation().y, p.getDevice().getIDstring());
-    }
-
-    private static void setLogger() {
+    /**
+     * This method turns the GlobalScreen logger's level a bit higher than the default.
+     */
+    private static void setGlobalScreenLoggerLevel(Level level) {
         Logger logger = Logger.getLogger(GlobalScreen.class.getPackage().getName());
-        logger.setLevel(Level.WARNING);
+        logger.setLevel(level);
 
         logger.setUseParentHandlers(false); //As instructed here: https://github.com/kwhat/jnativehook/wiki/ConsoleOutput
     }

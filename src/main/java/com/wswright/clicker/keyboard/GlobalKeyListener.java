@@ -1,5 +1,5 @@
 package com.wswright.clicker.keyboard;
-import com.wswright.clicker.loop.ILoop;
+import com.wswright.clicker.config.Config;
 import org.jnativehook.keyboard.NativeKeyEvent;
 import org.jnativehook.keyboard.NativeKeyListener;
 
@@ -7,23 +7,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
 
 public class GlobalKeyListener implements NativeKeyListener {
-    private static final boolean IS_KEY_DEBUGGING_ENABLED = false;
-    Logger logger = Logger.getGlobal();
-    private ILoop loop;
+    private static final boolean IS_KEY_DEBUGGING_ENABLED = Config.ENABLE_KEY_DEBUGGING;
     private List<IKeyHook> keyHookList = new ArrayList<>();
     private Map<Integer, Boolean> pressing = new HashMap<>();
-
-
-    public ILoop getLoop() {
-        return loop;
-    }
-
-    public void setLoop(ILoop loop) {
-        this.loop = loop;
-    }
 
     public void addKeyHook(IKeyHook keyHook) {
         keyHookList.add(keyHook);

@@ -4,7 +4,7 @@ import com.wswright.clicker.config.Config;
 import org.jnativehook.keyboard.NativeKeyEvent;
 
 public class OnOffKeyHook implements IKeyHook{
-    private static final int TOGGLE_KEYCODE = Config.KEY_KB_SPACE;
+    private static final int TOGGLE_KEYCODE = Config.KEY_KB_ACCENT_TILDE;
     private boolean toggle;
 
     public boolean isOn() {

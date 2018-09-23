@@ -18,8 +18,8 @@ public class ScreenRect {
     private Random random = new Random();
     private static boolean ENABLE_EVEN_DISTRIBUTION = true;
     private static boolean ENABLE_PIXEL_PADDING = true;
-    private static int PIXEL_PADDING_AMOUNT = 5;
-    private static int MAX_QUEUE_SIZE = 1000;
+    private static int PIXEL_PADDING_AMOUNT = 50;
+    private static int MAX_QUEUE_SIZE = 10000;
     private static Queue<Point> recentPoints = new ConcurrentLinkedQueue<>();
 
 
@@ -114,10 +114,14 @@ public class ScreenRect {
             if(MAX_QUEUE_SIZE > area())
                 MAX_QUEUE_SIZE = area() / 2;
             Point newPoint;
+            int loops = 0;
             do {
                 int rand_x = getRandomWithBound(w, x);
                 int rand_y = getRandomWithBound(h, y);
                 newPoint = new Point(rand_x, rand_y);
+                if(recentPoints.size() > 10 && loops % 100 == 0)
+                    recentPoints.remove();
+                loops++;
             } while (wasRecent(newPoint));
             recentPoints.add(newPoint);
             if(recentPoints.size() > MAX_QUEUE_SIZE)

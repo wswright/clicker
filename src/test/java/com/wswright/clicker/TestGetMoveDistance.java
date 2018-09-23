@@ -47,6 +47,9 @@ public class TestGetMoveDistance {
         assertThat(mover.getMoveDistance(p1,p2).getValue()).isEqualTo(400);
     }
 
+    /**
+     * Note: This test will actually move your mouse.
+     */
     @Test
     public void testMouseActuallyMoves() {
         Random r = new Random();
