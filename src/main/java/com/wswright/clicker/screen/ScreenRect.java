@@ -1,7 +1,11 @@
 package com.wswright.clicker.screen;
 
 import java.awt.*;
+import java.util.Queue;
 import java.util.Random;
+import java.util.SortedMap;
+import java.util.TreeMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class ScreenRect {
     private static final int RANDOM_SPIN_CUTOFF = 50;
@@ -12,6 +16,12 @@ public class ScreenRect {
     private Point p;
     private boolean isFinished = false;
     private Random random = new Random();
+    private static boolean ENABLE_EVEN_DISTRIBUTION = true;
+    private static boolean ENABLE_PIXEL_PADDING = true;
+    private static int PIXEL_PADDING_AMOUNT = 5;
+    private static int MAX_QUEUE_SIZE = 1000;
+    private static Queue<Point> recentPoints = new ConcurrentLinkedQueue<>();
+
 
     public int getX() {
         return x;
@@ -68,8 +78,24 @@ public class ScreenRect {
         this.w = Math.abs(p1.x - p2.x);
         this.h = Math.abs(p1.y - p2.y);
         isFinished = true;
+        MAX_QUEUE_SIZE = (int)Math.ceil(Math.sqrt(area()));
 
         return this;
+    }
+
+    private boolean wasRecent(Point p) {
+        for(Point recent : recentPoints) {
+            if(ENABLE_PIXEL_PADDING) {
+                return withinPixelsOf(PIXEL_PADDING_AMOUNT, p.x, p.y, recent.x, recent.y);
+            } else {
+                return (recent.x == p.x && recent.y == p.y);
+            }
+        }
+        return false;
+    }
+
+    private boolean withinPixelsOf(int numPix, int x1, int y1, int x2, int y2) {
+        return (Math.abs(x1-x2) <= numPix) ? ((Math.abs(y1-y2) <= numPix) ? true : false) : false;
     }
 
 
@@ -83,9 +109,26 @@ public class ScreenRect {
     public Point getRandomPointInArea() {
         if(!isFinished)
             return new Point(x, y); //Use first point (or 0,0) if none exist
-        int rand_x = getRandomWithBound(w, x);
-        int rand_y = getRandomWithBound(h, y);
-        return new Point(rand_x, rand_y);
+
+        if(ENABLE_EVEN_DISTRIBUTION) {
+            if(MAX_QUEUE_SIZE > area())
+                MAX_QUEUE_SIZE = area() / 2;
+            Point newPoint;
+            do {
+                int rand_x = getRandomWithBound(w, x);
+                int rand_y = getRandomWithBound(h, y);
+                newPoint = new Point(rand_x, rand_y);
+            } while (wasRecent(newPoint));
+            recentPoints.add(newPoint);
+            if(recentPoints.size() > MAX_QUEUE_SIZE)
+                for(int i=0; i<random.nextInt(MAX_QUEUE_SIZE/10); i++)
+                    recentPoints.remove();//Remove one
+            return newPoint;
+        } else {
+            int rand_x = getRandomWithBound(w, x);
+            int rand_y = getRandomWithBound(h, y);
+            return new Point(rand_x, rand_y);
+        }
     }
 
     private int getRandomWithBound(int bound, int coord) {
