@@ -18,7 +18,7 @@ public class ScreenRect {
     private Random random = new Random();
     private static boolean ENABLE_EVEN_DISTRIBUTION = true;
     private static boolean ENABLE_PIXEL_PADDING = true;
-    private static int PIXEL_PADDING_AMOUNT = 50;
+    private static int PIXEL_PADDING_AMOUNT = 20;
     private static int MAX_QUEUE_SIZE = 10000;
     private static Queue<Point> recentPoints = new ConcurrentLinkedQueue<>();
 
@@ -78,7 +78,7 @@ public class ScreenRect {
         this.w = Math.abs(p1.x - p2.x);
         this.h = Math.abs(p1.y - p2.y);
         isFinished = true;
-        MAX_QUEUE_SIZE = (int)Math.ceil(Math.sqrt(area()));
+        MAX_QUEUE_SIZE = area() / (PIXEL_PADDING_AMOUNT*2);
 
         return this;
     }
@@ -86,9 +86,11 @@ public class ScreenRect {
     private boolean wasRecent(Point p) {
         for(Point recent : recentPoints) {
             if(ENABLE_PIXEL_PADDING) {
-                return withinPixelsOf(PIXEL_PADDING_AMOUNT, p.x, p.y, recent.x, recent.y);
+                 if(withinPixelsOf(PIXEL_PADDING_AMOUNT, p.x, p.y, recent.x, recent.y))
+                     return true;
             } else {
-                return (recent.x == p.x && recent.y == p.y);
+                if(recent.x == p.x && recent.y == p.y)
+                    return true;
             }
         }
         return false;
@@ -119,13 +121,16 @@ public class ScreenRect {
                 int rand_x = getRandomWithBound(w, x);
                 int rand_y = getRandomWithBound(h, y);
                 newPoint = new Point(rand_x, rand_y);
-                if(recentPoints.size() > 10 && loops % 100 == 0)
+                if(recentPoints.size() > 1000 && loops % 5 == 0)
                     recentPoints.remove();
+                if(loops > 1000)
+                    recentPoints.clear();
                 loops++;
             } while (wasRecent(newPoint));
+            System.out.println(String.format("LoopCounter: %d, QueueSize: %d", loops, recentPoints.size()));
             recentPoints.add(newPoint);
-            if(recentPoints.size() > MAX_QUEUE_SIZE)
-                for(int i=0; i<random.nextInt(MAX_QUEUE_SIZE/10); i++)
+            if(loops > area() / PIXEL_PADDING_AMOUNT)
+                for(int i=0; i<random.nextInt(recentPoints.size()/10); i++)
                     recentPoints.remove();//Remove one
             return newPoint;
         } else {
