@@ -4,7 +4,6 @@ import com.wswright.clicker.keyboard.*;
 import com.wswright.clicker.loop.StartStopLoop;
 import com.wswright.clicker.mouse.MouseGetter;
 import com.wswright.clicker.mouse.MouseMover;
-import com.wswright.clicker.screen.ScreenRect;
 import org.jnativehook.GlobalScreen;
 import org.jnativehook.NativeHookException;
 
@@ -52,8 +51,6 @@ public class Main {
                 //Only do this if we are toggled ON
                 if(onOffHook.isOn()) {
                     Point p = boxHook.getRect().getRandomPointInArea();
-                    PointerInfo pointerInfo = mouseGetter.getMouse();
-//                    System.out.println(String.format("Mouse is at: %s", fmtPointerInfo(pointerInfo)));
                     mouseMover.moveTo(p);
                     mouseMoved = true;
                     System.out.println(String.format("MOVING to %s in box: %s", fmtPoint(p), boxHook.getRect().toString()));
@@ -63,8 +60,8 @@ public class Main {
             }
             try {
                 if(mouseMoved)
-                    Thread.sleep(10);
-                else
+                    Thread.sleep(10);//We still need to sleep even if the mouse moved,
+                else                        //Otherwise Explorer.exe crashes on Windows
                     Thread.sleep(50);
             } catch (InterruptedException e) {
                 e.printStackTrace();
